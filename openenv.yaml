@@ -1,0 +1,42 @@
+name: email-triage-env
+description: |
+  A real-world reinforcement learning environment where an agent learns to classify emails
+  into spam, important, or normal categories.
+
+version: 1.0
+
+environment:
+  entry_point: env:EmailEnv
+
+api:
+  reset: true
+  step: true
+  state: true
+
+observation:
+  type: object
+  fields:
+    goal: string
+    url: string
+    email: object
+    metadata: object
+
+actions:
+  type: string
+  description: |
+    Browser-style actions such as:
+    click('1') → mark_spam
+    click('2') → mark_important
+    click('3') → mark_normal
+
+reward:
+  type: float
+  range: [-1, 1]
+
+done:
+  type: boolean
+
+tasks:
+  - name: easy
+  - name: medium
+  - name: hard
