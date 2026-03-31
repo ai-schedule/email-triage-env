@@ -3,7 +3,7 @@ from env import EmailEnv
 
 app = FastAPI()
 
-env = EmailEnv(difficulty="easy")
+env = EmailEnv()
 
 @app.post("/reset")
 def reset():
@@ -31,4 +31,4 @@ def step(action: str):
 
 @app.get("/")
 def home():
-    return {"message": "Email Triage Environment Running"}
+    return {"message": "Email Triage Env Running"}
