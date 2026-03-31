@@ -4,6 +4,6 @@ WORKDIR /app
 
 COPY . .
 
-RUN pip install numpy pillow
+RUN pip install fastapi uvicorn numpy pillow openai
 
-CMD ["python", "test_env.py"]
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "7860"]
