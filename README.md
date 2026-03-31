@@ -1,33 +1,23 @@
-# 📧 Email Triage RL Environment
-
-## 📌 Overview
-This project implements a real-world reinforcement learning environment where an AI agent learns to classify emails into categories:
-- Spam
-- Important
-- Normal
-
-The environment follows the OpenEnv API with `reset()`, `step()`, and `state()` functions.
-
+---
+title: Email Triage Env
+emoji: 📧
+colorFrom: blue
+colorTo: purple
+sdk: docker
+app_file: app.py
+pinned: false
 ---
 
-## 🎯 Objective
-Train an AI agent to correctly classify incoming emails and maximize reward.
+# Email Triage RL Environment
 
----
+This is a reinforcement learning environment where an agent learns to classify emails.
 
-## 🧠 Environment Design
+## API
 
-### 🔹 State (Observation)
-Each state contains:
-- Email subject
-- Email body
-- Classification goal
-- Metadata for actions
+POST /reset  
+POST /step  
 
-Example:
-```python
-{
-  "subject": "Win money now!!!",
-  "body": "Claim prize",
-  "label": "spam"
-}
+Actions:
+- click('1') → spam  
+- click('2') → important  
+- click('3') → normal  
