@@ -1,0 +1,19 @@
+[project]
+name = "email-triage-env"
+version = "0.1.0"
+description = "Email triage reinforcement learning environment"
+authors = [
+  { name = "Maanya" }
+]
+
+dependencies = [
+  "fastapi",
+  "uvicorn",
+  "numpy",
+  "pillow",
+  "openai"
+]
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
