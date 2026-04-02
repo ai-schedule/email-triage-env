@@ -2,7 +2,6 @@ from fastapi import FastAPI
 from env import EmailEnv
 
 app = FastAPI()
-
 env = EmailEnv()
 
 @app.post("/reset")
@@ -34,5 +33,12 @@ def home():
     return {"status": "running"}
 
 
+# ✅ REQUIRED MAIN FUNCTION
 def main():
     return app
+
+
+# ✅ THIS WAS MISSING (CRITICAL FIX)
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("server.app:app", host="0.0.0.0", port=7860)
