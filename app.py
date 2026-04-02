@@ -31,4 +31,4 @@ def step(action: str):
 
 @app.get("/")
 def home():
-    return {"message": "Email Triage Env Running"}
+    return {"status": "running"}
