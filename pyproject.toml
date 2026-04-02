@@ -1,18 +1,20 @@
 [project]
 name = "email-triage-env"
 version = "0.1.0"
-description = "Email triage reinforcement learning environment"
-authors = [
-  { name = "Maanya" }
-]
+description = "Email triage RL environment"
+authors = [{ name = "Maanya" }]
 
 dependencies = [
   "fastapi",
   "uvicorn",
   "numpy",
   "pillow",
-  "openai"
+  "openai",
+  "openenv-core>=0.2.0"
 ]
+
+[project.scripts]
+server = "app:app"
 
 [build-system]
 requires = ["setuptools", "wheel"]
