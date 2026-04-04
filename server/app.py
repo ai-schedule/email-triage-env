@@ -7,25 +7,37 @@ env = EmailEnv()
 @app.post("/reset")
 def reset():
     result = env.reset()
+    obs = result.observation
+
     return {
         "observation": {
-            "goal": result.observation.goal,
-            "email": result.observation.email
+            "goal": obs.goal,
+            "email": obs.email,
+            "stage": obs.stage,
+            "priority_score": obs.priority_score,
+            "history": obs.history
         },
         "reward": result.reward,
-        "done": result.done
+        "done": result.done,
+        "info": result.info
     }
 
 @app.post("/step")
 def step(action: str):
     result = env.step(action)
+    obs = result.observation
+
     return {
         "observation": {
-            "goal": result.observation.goal,
-            "email": result.observation.email
+            "goal": obs.goal,
+            "email": obs.email,
+            "stage": obs.stage,
+            "priority_score": obs.priority_score,
+            "history": obs.history
         },
         "reward": result.reward,
-        "done": result.done
+        "done": result.done,
+        "info": result.info
     }
 
 @app.get("/")
@@ -33,12 +45,10 @@ def home():
     return {"status": "running"}
 
 
-# ✅ REQUIRED MAIN FUNCTION
 def main():
     return app
 
 
-# ✅ THIS WAS MISSING (CRITICAL FIX)
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("server.app:app", host="0.0.0.0", port=7860)
