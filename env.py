@@ -15,7 +15,7 @@ class Observation:
             }
         }
 
-        # ✅ UPDATED: richer email info
+        # Email data
         self.email = {
             "subject": email["subject"],
             "body": email["body"],
@@ -23,19 +23,29 @@ class Observation:
             "timestamp": email["timestamp"]
         }
 
+        # ✅ NEW: Priority score (based on keywords)
+        urgent_keywords = ["urgent", "account", "payment", "alert"]
+        score = 0
+
+        for word in urgent_keywords:
+            if word in email["subject"].lower():
+                score += 1
+
+        self.priority_score = min(score / 4, 1.0)
+
 
 class Result:
-    def __init__(self, observation, reward, done):
+    def __init__(self, observation, reward, done, info=None):
         self.observation = observation
         self.reward = reward
         self.done = done
+        self.info = info or {}
 
 
 class EmailEnv:
     def __init__(self, difficulty="easy"):
         self.valid_actions = ["mark_spam", "mark_important", "mark_normal"]
 
-        # ✅ REALISTIC EMAIL DATASET
         self.easy_emails = [
             {
                 "subject": "URGENT: Account Suspended",
@@ -60,61 +70,7 @@ class EmailEnv:
             }
         ]
 
-        self.medium_emails = [
-            {
-                "subject": "Invoice Pending Payment",
-                "body": "Please clear dues before deadline",
-                "sender": "billing@service.com",
-                "timestamp": "2026-04-02 09:00",
-                "label": "important"
-            },
-            {
-                "subject": "Limited Time Offer!!!",
-                "body": "Huge discounts available",
-                "sender": "ads@promo.com",
-                "timestamp": "2026-04-02 10:00",
-                "label": "spam"
-            },
-            {
-                "subject": "Weekend Plan",
-                "body": "Shall we go out this weekend?",
-                "sender": "friend@gmail.com",
-                "timestamp": "2026-04-02 12:00",
-                "label": "normal"
-            }
-        ]
-
-        self.hard_emails = [
-            {
-                "subject": "Payment Failed Alert",
-                "body": "If not you, contact support",
-                "sender": "noreply@bank.com",
-                "timestamp": "2026-04-03 08:00",
-                "label": "important"
-            },
-            {
-                "subject": "Congratulations! You are selected",
-                "body": "Claim reward now",
-                "sender": "lottery@unknown.com",
-                "timestamp": "2026-04-03 09:00",
-                "label": "spam"
-            },
-            {
-                "subject": "Reminder: Submit Assignment",
-                "body": "Deadline tonight",
-                "sender": "professor@college.edu",
-                "timestamp": "2026-04-03 10:00",
-                "label": "important"
-            }
-        ]
-
-        # difficulty selection
-        if difficulty == "easy":
-            self.emails = self.easy_emails
-        elif difficulty == "medium":
-            self.emails = self.medium_emails
-        else:
-            self.emails = self.hard_emails
+        self.emails = self.easy_emails
 
         self.current_index = 0
         self.current_email = None
@@ -144,14 +100,22 @@ class EmailEnv:
         action = self.parse_action(action_str)
         correct_label = self.current_email["label"]
 
+        # ✅ NEW: Confidence-based reward
         if action == f"mark_{correct_label}":
-            reward = 1
+            confidence = 0.9
+            reward = confidence
             self.correct += 1
-        elif action == "invalid":
-            reward = -1
-        else:
-            reward = -0.5
 
+        elif action == "invalid":
+            confidence = 0.0
+            reward = -1
+
+        else:
+            # partial correctness
+            confidence = 0.3
+            reward = -0.5 + confidence * 0.2
+
+        # move forward
         self.current_index += 1
 
         if self.current_index >= len(self.emails):
@@ -159,7 +123,15 @@ class EmailEnv:
         else:
             self.current_email = self.emails[self.current_index]
 
-        return Result(self.state(), reward, self.done)
+        return Result(
+            self.state(),
+            reward,
+            self.done,
+            info={
+                "confidence": confidence,
+                "correct_label": correct_label
+            }
+        )
 
     def state(self):
         return Observation(self.current_email, self.current_index)
