@@ -1,11 +1,11 @@
 class Observation:
-    def __init__(self, email, step, stage):
-        self.goal = "Classify and take action on the email"
+    def __init__(self, email, step, stage, history):
+        self.goal = "Classify and take action on the email intelligently"
         self.url = f"inbox://email/{step}"
         self.screenshot = None
         self.last_action_error = False
 
-        # dynamic actions based on stage
+        # dynamic actions
         if stage == "classify":
             elements = {
                 "1": {"clickable": True},
@@ -25,19 +25,14 @@ class Observation:
             }
         }
 
-        self.email = {
-            "subject": email["subject"],
-            "body": email["body"],
-            "sender": email["sender"],
-            "timestamp": email["timestamp"]
-        }
+        self.email = email
+        self.stage = stage
+        self.history = history[-3:]  # last 3 emails
 
         # priority score
         urgent_keywords = ["urgent", "account", "payment", "alert"]
         score = sum(word in email["subject"].lower() for word in urgent_keywords)
         self.priority_score = min(score / 4, 1.0)
-
-        self.stage = stage
 
 
 class Result:
@@ -83,12 +78,15 @@ class EmailEnv:
         self.correct = 0
         self.stage = "classify"
         self.last_classification = None
+        self.history = []
 
     def reset(self):
         self.current_index = 0
         self.done = False
         self.correct = 0
         self.stage = "classify"
+        self.history = []
+
         self.current_email = self.emails[self.current_index]
 
         return Result(self.state(), 0, False)
@@ -108,6 +106,18 @@ class EmailEnv:
             return "ignore"
         return "invalid"
 
+    def generate_explanation(self, email, action):
+        subject = email["subject"].lower()
+
+        if "win" in subject or "offer" in subject:
+            return "Detected promotional keywords, likely spam"
+        elif "urgent" in subject or "account" in subject:
+            return "Detected urgency/security keywords, marked important"
+        elif "meeting" in subject:
+            return "General communication, marked normal"
+        else:
+            return f"Action {action} based on pattern recognition"
+
     def step(self, action_str):
         if self.done:
             return Result(self.state(), 0, True)
@@ -115,24 +125,35 @@ class EmailEnv:
         action = self.parse_action(action_str)
         correct_label = self.current_email["label"]
 
-        # 🔥 STAGE 1: CLASSIFICATION
+        # 🔹 STAGE 1: CLASSIFICATION
         if self.stage == "classify":
 
             if action == f"mark_{correct_label}":
                 reward = 1
+                confidence = 0.9
                 self.correct += 1
             else:
                 reward = -0.5
+                confidence = 0.3
+
+            explanation = self.generate_explanation(self.current_email, action)
 
             self.last_classification = action
             self.stage = "decision"
 
-            return Result(self.state(), reward, False)
+            return Result(
+                self.state(),
+                reward,
+                False,
+                info={
+                    "confidence": confidence,
+                    "explanation": explanation
+                }
+            )
 
-        # 🔥 STAGE 2: DECISION
+        # 🔹 STAGE 2: DECISION
         elif self.stage == "decision":
 
-            # correct behavior logic
             if correct_label == "spam" and action == "archive":
                 reward = 1
             elif correct_label == "important" and action == "reply":
@@ -142,7 +163,12 @@ class EmailEnv:
             else:
                 reward = -0.5
 
-            # move to next email
+            explanation = f"Decision {action} taken based on classification {self.last_classification}"
+
+            # store history
+            self.history.append(self.current_email)
+
+            # move next
             self.current_index += 1
             self.stage = "classify"
 
@@ -151,10 +177,22 @@ class EmailEnv:
             else:
                 self.current_email = self.emails[self.current_index]
 
-            return Result(self.state(), reward, self.done)
+            return Result(
+                self.state(),
+                reward,
+                self.done,
+                info={
+                    "explanation": explanation
+                }
+            )
 
     def state(self):
-        return Observation(self.current_email, self.current_index, self.stage)
+        return Observation(
+            self.current_email,
+            self.current_index,
+            self.stage,
+            self.history
+        )
 
     def get_score(self):
         return self.correct / len(self.emails)
