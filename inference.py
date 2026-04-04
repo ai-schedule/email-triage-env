@@ -8,6 +8,7 @@ HF_TOKEN = os.getenv("HF_TOKEN")
 
 client = OpenAI(base_url=API_BASE_URL, api_key=HF_TOKEN)
 
+
 def main():
     print("START")
 
@@ -19,7 +20,11 @@ def main():
     done = False
 
     while not done:
-        prompt = f"Classify this email: {obs.email}"
+        prompt = f"""
+        Email:
+        {obs.email}
+        Stage: {obs.stage}
+        """
 
         try:
             completion = client.chat.completions.create(
@@ -36,18 +41,24 @@ def main():
             action = "click('1')"
         elif "important" in response:
             action = "click('2')"
-        else:
+        elif "normal" in response:
             action = "click('3')"
+        elif "archive" in response:
+            action = "click('4')"
+        elif "reply" in response:
+            action = "click('5')"
+        else:
+            action = "click('6')"
 
         print(f"STEP {step}: {action}")
 
         result = env.step(action)
         obs = result.observation
         done = result.done
-
         step += 1
 
     print("END")
+
 
 if __name__ == "__main__":
     main()
