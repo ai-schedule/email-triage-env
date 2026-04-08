@@ -8,8 +8,19 @@ environment:
 
 tasks:
   - name: easy
+    grader:
+      type: score
+      entry_point: env:EmailEnv.get_score
+
   - name: medium
+    grader:
+      type: score
+      entry_point: env:EmailEnv.get_score
+
   - name: hard
+    grader:
+      type: score
+      entry_point: env:EmailEnv.get_score
 
 api:
   reset: true
