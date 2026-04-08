@@ -6,10 +6,12 @@ version: 1.0
 environment:
   entry_point: env:EmailEnv
 
+tasks:
+  - name: easy
+  - name: medium
+  - name: hard
+
 api:
   reset: true
   step: true
   state: true
-
-tasks:
-  - name: easy
