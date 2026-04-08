@@ -23,8 +23,7 @@ def main():
     while not done:
         prompt = f"""
         Email:
-        Subject: {obs.email['subject']}
-        Body: {obs.email['body']}
+        {obs.email}
         Stage: {obs.stage}
         """
 
@@ -39,7 +38,6 @@ def main():
         except Exception:
             response = "spam"
 
-        # map response → action
         if "spam" in response:
             action = "click('1')"
         elif "important" in response:
@@ -57,16 +55,14 @@ def main():
         obs = result.observation
         done = result.done
 
-        reward = result.reward if result.reward is not None else 0
+        reward = result.reward or 0
         total_reward += reward
 
         print(f"[STEP] step={step} reward={reward}", flush=True)
-
         step += 1
 
-    final_score = env.get_score()
-
-    print(f"[END] task=email-triage score={final_score} steps={step-1}", flush=True)
+    score = env.get_score()
+    print(f"[END] task=email-triage score={score} steps={step-1}", flush=True)
 
 
 if __name__ == "__main__":
