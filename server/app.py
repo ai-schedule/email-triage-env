@@ -5,8 +5,8 @@ app = FastAPI()
 env = EmailEnv()
 
 @app.post("/reset")
-def reset():
-    result = env.reset()
+def reset(task: str = "easy"):
+    result = env.reset(task)
     obs = result.observation
 
     return {
