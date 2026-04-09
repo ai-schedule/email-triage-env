@@ -12,21 +12,21 @@ tasks:
       difficulty: easy
     grader:
       type: python
-      entry_point: env:grade
+      entry_point: grader:grade
 
   - name: medium
     env_kwargs:
       difficulty: medium
     grader:
       type: python
-      entry_point: env:grade
+      entry_point: grader:grade
 
   - name: hard
     env_kwargs:
       difficulty: hard
     grader:
       type: python
-      entry_point: env:grade
+      entry_point: grader:grade
 
 api:
   reset: true
