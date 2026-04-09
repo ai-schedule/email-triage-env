@@ -8,19 +8,25 @@ environment:
 
 tasks:
   - name: easy
+    env_kwargs:
+      difficulty: easy
     grader:
-      type: score
-      entry_point: env:EmailEnv.get_score
+      type: python
+      entry_point: env:grade
 
   - name: medium
+    env_kwargs:
+      difficulty: medium
     grader:
-      type: score
-      entry_point: env:EmailEnv.get_score
+      type: python
+      entry_point: env:grade
 
   - name: hard
+    env_kwargs:
+      difficulty: hard
     grader:
-      type: score
-      entry_point: env:EmailEnv.get_score
+      type: python
+      entry_point: env:grade
 
 api:
   reset: true
