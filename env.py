@@ -139,3 +139,10 @@ class EmailEnv:
 
     def get_score(self):
         return self.correct / len(self.emails)
+
+
+# ✅ FINAL GRADER (VERY IMPORTANT)
+def grade(env):
+    return {
+        "score": env.get_score()
+    }
