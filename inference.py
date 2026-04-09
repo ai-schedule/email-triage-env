@@ -18,14 +18,9 @@ def main():
 
     step = 1
     done = False
-    total_reward = 0
 
     while not done:
-        prompt = f"""
-        Email:
-        {obs.email}
-        Stage: {obs.stage}
-        """
+        prompt = f"Email: {obs.email}, Stage: {obs.stage}"
 
         try:
             completion = client.chat.completions.create(
@@ -56,9 +51,8 @@ def main():
         done = result.done
 
         reward = result.reward or 0
-        total_reward += reward
-
         print(f"[STEP] step={step} reward={reward}", flush=True)
+
         step += 1
 
     score = env.get_score()
